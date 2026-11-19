@@ -1,0 +1,30 @@
+{
+  "iterations": 21,
+  "reached_threshold": 8,
+  "accepted": 8,
+  "collapsed": 2,
+  "mean_decisive_win_rate": 0.5201,
+  "games_per_arena": 40,
+  "mean_draws_per_arena": 18.71,
+  "mean_distinct_games_per_arena": 25.24,
+  "min_distinct_games": 12,
+  "iterations_reached_threshold": [
+    2,
+    4,
+    6,
+    7,
+    10,
+    12,
+    13,
+    19
+  ],
+  "iterations_collapsed": [
+    16,
+    17
+  ],
+  "total_train_hours": 16.16,
+  "avg_game_length": 34.15,
+  "avg_examples_per_iteration": 3415.3,
+  "selfplay_first_player_win_rate": 0.245,
+  "selfplay_draw_rate": 0.488
+}

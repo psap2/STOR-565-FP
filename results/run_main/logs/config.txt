@@ -1,0 +1,18 @@
+torch 2.15.0  numpy 2.5.5
+arenaCompare = 40
+batch_size = 64
+cpuct = 1.0
+device = cpu
+dropout = 0.3
+epochs = 10
+lr = 0.001
+maxlenOfQueue = 200000
+numEps = 50
+numIters = 30
+numItersForTrainExamplesHistory = 20
+numMCTSSims = 100
+num_channels = 512
+run_dir = runs/main
+seed = 565
+tempThreshold = 15
+updateThreshold = 0.6

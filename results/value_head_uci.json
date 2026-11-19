@@ -1,0 +1,150 @@
+[
+  {
+    "checkpoint": "runs/main/checkpoints/checkpoint_0.pth.tar",
+    "n_test": 13512,
+    "acc_fixed_thresholds": 0.0955,
+    "acc_fixed_wilson95": [
+      0.0906,
+      0.1005
+    ],
+    "confusion_fixed": [
+      [
+        0,
+        3327,
+        0
+      ],
+      [
+        0,
+        1290,
+        0
+      ],
+      [
+        0,
+        8895,
+        0
+      ]
+    ],
+    "calibrated_thresholds": [
+      -0.6,
+      -0.55
+    ],
+    "acc_calibrated": 0.6583,
+    "auc_win_vs_loss": 0.5132,
+    "mean_v_by_class": {
+      "loss": -0.0177,
+      "draw": -0.0177,
+      "win": -0.0177
+    }
+  },
+  {
+    "checkpoint": "runs/main/checkpoints/checkpoint_4.pth.tar",
+    "n_test": 13512,
+    "acc_fixed_thresholds": 0.5686,
+    "acc_fixed_wilson95": [
+      0.5602,
+      0.5769
+    ],
+    "confusion_fixed": [
+      [
+        2262,
+        133,
+        932
+      ],
+      [
+        667,
+        71,
+        552
+      ],
+      [
+        3153,
+        392,
+        5350
+      ]
+    ],
+    "calibrated_thresholds": [
+      -0.6,
+      -0.55
+    ],
+    "acc_calibrated": 0.623,
+    "auc_win_vs_loss": 0.7166,
+    "mean_v_by_class": {
+      "loss": -0.3534,
+      "draw": -0.0878,
+      "win": 0.2201
+    }
+  },
+  {
+    "checkpoint": "runs/main/checkpoints/checkpoint_13.pth.tar",
+    "n_test": 13512,
+    "acc_fixed_thresholds": 0.5925,
+    "acc_fixed_wilson95": [
+      0.5842,
+      0.6008
+    ],
+    "confusion_fixed": [
+      [
+        2116,
+        253,
+        958
+      ],
+      [
+        551,
+        138,
+        601
+      ],
+      [
+        2582,
+        561,
+        5752
+      ]
+    ],
+    "calibrated_thresholds": [
+      -0.6,
+      -0.55
+    ],
+    "acc_calibrated": 0.6427,
+    "auc_win_vs_loss": 0.7309,
+    "mean_v_by_class": {
+      "loss": -0.3059,
+      "draw": 0.0292,
+      "win": 0.3298
+    }
+  },
+  {
+    "checkpoint": "runs/main/checkpoints/checkpoint_19.pth.tar",
+    "n_test": 13512,
+    "acc_fixed_thresholds": 0.6001,
+    "acc_fixed_wilson95": [
+      0.5918,
+      0.6084
+    ],
+    "confusion_fixed": [
+      [
+        2020,
+        278,
+        1029
+      ],
+      [
+        526,
+        124,
+        640
+      ],
+      [
+        2347,
+        583,
+        5965
+      ]
+    ],
+    "calibrated_thresholds": [
+      -0.6,
+      -0.55
+    ],
+    "acc_calibrated": 0.6487,
+    "auc_win_vs_loss": 0.7378,
+    "mean_v_by_class": {
+      "loss": -0.2547,
+      "draw": 0.0907,
+      "win": 0.3748
+    }
+  }
+]

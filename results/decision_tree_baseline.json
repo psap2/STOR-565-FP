@@ -1,0 +1,50 @@
+{
+  "n_total": 67557,
+  "n_train": 54045,
+  "n_test": 13512,
+  "seed": 565,
+  "class_counts_total": {
+    "win": 44473,
+    "loss": 16635,
+    "draw": 6449
+  },
+  "majority_class": "win",
+  "majority_test_acc": 0.6583,
+  "best_params": {
+    "max_depth": 16,
+    "min_samples_leaf": 1
+  },
+  "cv_acc": 0.7627,
+  "test_acc": 0.7729,
+  "test_acc_wilson95": [
+    0.7657,
+    0.7799
+  ],
+  "confusion_labels_rows_true_cols_pred": [
+    "loss",
+    "draw",
+    "win"
+  ],
+  "confusion": [
+    [
+      2263,
+      249,
+      815
+    ],
+    [
+      344,
+      289,
+      657
+    ],
+    [
+      671,
+      333,
+      7891
+    ]
+  ],
+  "per_class_recall": {
+    "loss": 0.6802,
+    "draw": 0.224,
+    "win": 0.8871
+  }
+}
