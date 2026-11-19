@@ -26,6 +26,7 @@ class Arena():
         self.player2 = player2
         self.game = game
         self.display = display
+        self.game_moves = []  # move sequence of every game played, used to count distinct games
 
     def playGame(self, verbose=False):
         """
@@ -41,6 +42,7 @@ class Arena():
         curPlayer = 1
         board = self.game.getInitBoard()
         it = 0
+        moves = []  # actions taken in this game, in order
 
         for player in players[0], players[2]:
             if hasattr(player, "startGame"):
@@ -66,7 +68,9 @@ class Arena():
             if hasattr(opponent, "notify"):
                 opponent.notify(board, action)
 
+            moves.append(int(action))
             board, curPlayer = self.game.getNextState(board, curPlayer, action)
+        self.game_moves.append(tuple(moves))
 
         for player in players[0], players[2]:
             if hasattr(player, "endGame"):

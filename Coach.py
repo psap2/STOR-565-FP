@@ -1,6 +1,8 @@
+import csv
 import logging
 import os
 import sys
+import time
 from collections import deque
 from pickle import Pickler, Unpickler
 from random import shuffle
@@ -28,6 +30,18 @@ class Coach():
         self.mcts = MCTS(self.game, self.nnet, self.args)
         self.trainExamplesHistory = []  # history of examples from args.numItersForTrainExamplesHistory latest iterations
         self.skipFirstSelfPlay = False  # can be overriden in loadTrainExamples()
+        self.log_dir = args.log_dir  # where arena.csv / selfplay.csv are written
+
+    def _log_row(self, name, header, row):
+        """Append one row to <log_dir>/<name>.csv (writes the header on first use)."""
+        os.makedirs(self.log_dir, exist_ok=True)
+        path = os.path.join(self.log_dir, name)
+        new = not os.path.exists(path)
+        with open(path, 'a', newline='') as f:
+            w = csv.writer(f)
+            if new:
+                w.writerow(header)
+            w.writerow(row)
 
     def executeEpisode(self):
         """
@@ -77,16 +91,34 @@ class Coach():
         only if it wins >= updateThreshold fraction of games.
         """
 
+        # Save the untrained (randomly initialised) network as iteration 0, so that
+        # the evaluation scripts can show how much the network improved over training.
+        self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(0))
+
         for i in range(1, self.args.numIters + 1):
+            self.nnet.iteration = i  # tags the rows the network wrapper writes to losses.csv
+            t_start = time.time()  # wall-clock time per iteration is logged to arena.csv
             # bookkeeping
             log.info(f'Starting Iter #{i} ...')
             # examples of the iteration
             if not self.skipFirstSelfPlay or i > 1:
                 iterationTrainExamples = deque([], maxlen=self.args.maxlenOfQueue)
 
+                outcomes = {'first_player_wins': 0, 'second_player_wins': 0, 'draws': 0}  # self-play results for selfplay.csv
                 for _ in tqdm(range(self.args.numEps), desc="Self Play"):
                     self.mcts = MCTS(self.game, self.nnet, self.args)  # reset search tree
-                    iterationTrainExamples += self.executeEpisode()
+                    ex = self.executeEpisode()
+                    # the first example is the first player's move 1, so its value is the first player's result
+                    r0 = ex[0][2]
+                    outcomes['first_player_wins' if r0 > 0.5 else 'second_player_wins' if r0 < -0.5 else 'draws'] += 1
+                    iterationTrainExamples += ex
+                # with mirror augmentation every move yields 2 examples, so moves = examples / 2
+                n_ex = len(iterationTrainExamples)
+                self._log_row('selfplay.csv',
+                              ['iteration', 'games', 'examples', 'avg_game_length', 'first_player_wins',
+                               'second_player_wins', 'draws'],
+                              [i, self.args.numEps, n_ex, f'{n_ex / 2 / self.args.numEps:.2f}',
+                               outcomes['first_player_wins'], outcomes['second_player_wins'], outcomes['draws']])
 
                 # save the iteration examples to the history 
                 self.trainExamplesHistory.append(iterationTrainExamples)
@@ -96,7 +128,7 @@ class Coach():
                     f"Removing the oldest entry in trainExamples. len(trainExamplesHistory) = {len(self.trainExamplesHistory)}")
                 self.trainExamplesHistory.pop(0)
             # backup history to a file
-            # NB! the examples were collected using the model from the previous iteration, so (i-1)  
+            # the examples were collected with the model from the previous iteration, so they are saved as (i-1)
             self.saveTrainExamples(i - 1)
 
             # shuffle examples before training
@@ -119,7 +151,17 @@ class Coach():
             pwins, nwins, draws = arena.playGames(self.args.arenaCompare)
 
             log.info('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (nwins, pwins, draws))
-            if pwins + nwins == 0 or float(nwins) / (pwins + nwins) < self.args.updateThreshold:
+            # Log every arena result. Promotion rule is unchanged from upstream
+            # (draws are ignored: wins / (wins + losses) >= updateThreshold).
+            accepted = not (pwins + nwins == 0 or float(nwins) / (pwins + nwins) < self.args.updateThreshold)
+            decisive = pwins + nwins
+            self._log_row('arena.csv',
+                          ['iteration', 'new_wins', 'prev_wins', 'draws', 'games', 'distinct_games',
+                           'decisive_win_rate', 'accepted', 'seconds'],
+                          [i, nwins, pwins, draws, nwins + pwins + draws, len(set(arena.game_moves)),
+                           f'{nwins / decisive:.4f}' if decisive else '', int(accepted),
+                           f'{time.time() - t_start:.0f}'])
+            if not accepted:
                 log.info('REJECTING NEW MODEL')
                 self.nnet.load_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
             else:
