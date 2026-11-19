@@ -1,54 +1,32 @@
-import Arena
-from MCTS import MCTS
-from othello.OthelloGame import OthelloGame
-from othello.OthelloPlayers import *
-from othello.pytorch.NNet import NNetWrapper as NNet
+"""Play Connect 4 in the terminal against a trained network (human vs AI).
 
+Example:  python pit.py --checkpoint runs/main/checkpoints/best.pth.tar --sims 100
+Columns are numbered 0-6 from the left. You move first unless you pass --ai_first.
+"""
+import argparse
 
 import numpy as np
-from utils import *
 
-"""
-use this script to play any two agents against each other, or play manually with
-any agent.
-"""
+from eval.common import Connect4Game, load_nnet, mcts_player
+from connect4.Connect4Players import HumanConnect4Player
 
-mini_othello = False  # Play in 6x6 instead of the normal 8x8.
-human_vs_cpu = True
+ap = argparse.ArgumentParser()
+ap.add_argument('--checkpoint', required=True)
+ap.add_argument('--sims', type=int, default=100)
+ap.add_argument('--ai_first', action='store_true')
+a = ap.parse_args()
 
-if mini_othello:
-    g = OthelloGame(6)
-else:
-    g = OthelloGame(8)
+game = Connect4Game()
+ai = mcts_player(game, load_nnet(game, a.checkpoint), a.sims)()
+human = HumanConnect4Player(game).play
 
-# all players
-rp = RandomPlayer(g).play
-gp = GreedyOthelloPlayer(g).play
-hp = HumanOthelloPlayer(g).play
-
-
-
-# nnet players
-n1 = NNet(g)
-if mini_othello:
-    n1.load_checkpoint('./pretrained_models/othello/pytorch/','6x100x25_best.pth.tar')
-else:
-    n1.load_checkpoint('./pretrained_models/othello/pytorch/','8x8_100checkpoints_best.pth.tar')
-args1 = dotdict({'numMCTSSims': 50, 'cpuct':1.0})
-mcts1 = MCTS(g, n1, args1)
-n1p = lambda x: np.argmax(mcts1.getActionProb(x, temp=0))
-
-if human_vs_cpu:
-    player2 = hp
-else:
-    n2 = NNet(g)
-    n2.load_checkpoint('./pretrained_models/othello/pytorch/', '8x8_100checkpoints_best.pth.tar')
-    args2 = dotdict({'numMCTSSims': 50, 'cpuct': 1.0})
-    mcts2 = MCTS(g, n2, args2)
-    n2p = lambda x: np.argmax(mcts2.getActionProb(x, temp=0))
-
-    player2 = n2p  # Player 2 is neural network if it's cpu vs cpu.
-
-arena = Arena.Arena(n1p, player2, g, display=OthelloGame.display)
-
-print(arena.playGames(2, verbose=True))
+board, player = game.getInitBoard(), 1
+ai_player = 1 if a.ai_first else -1
+while game.getGameEnded(board, player) == 0:
+    game.display(board)
+    canon = game.getCanonicalForm(board, player)
+    action = ai(canon) if player == ai_player else human(canon)
+    board, player = game.getNextState(board, player, action)
+game.display(board)
+r = game.getGameEnded(board, player) * player  # result for player 1
+print('Draw' if abs(r) < 0.5 else ('Player 1 (x=+1) wins' if r > 0 else 'Player 2 (o=-1) wins'))
