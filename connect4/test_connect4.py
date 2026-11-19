@@ -13,6 +13,13 @@ from .Connect4Game import Connect4Game
 BPGTuple = namedtuple('BPGTuple', 'board player game')
 
 
+def _parse(text):
+    """The upstream tests compared a text rendering of the board with stringRepresentation
+    (which returns bytes), so they failed. We parse the expected text into an array instead."""
+    rows = [r.replace('[', ' ').replace(']', ' ').split() for r in text.strip().splitlines()]
+    return np.array([[float(x) for x in r] for r in rows])
+
+
 def init_board_from_moves(moves, height=None, width=None):
     """Returns a BPGTuple based on series of specified moved."""
     game = Connect4Game(height=height, width=width)
@@ -37,7 +44,7 @@ def test_simple_moves():
          [ 0.  0.  0.  0.  0.  0.  0.]
          [ 0.  0.  0.  0.  1.  0.  0.]
          [ 1.  0.  0. -1.  1. -1. -1.]]""")
-    assert expected == game.stringRepresentation(board)
+    assert (_parse(expected) == board).all()
 
 
 def test_overfull_column():
@@ -82,7 +89,7 @@ def test_symmetries():
          [-1.  0.  0.  0.  0.  0.  0.]
          [-1.  0.  0.  0.  0.  0.  0.]
          [ 1.  1.  0.  0.  0.  0.  1.]]""")
-    assert expected_board1 == game.stringRepresentation(board1)
+    assert (_parse(expected_board1) == board1).all()
 
     expected_board2 = textwrap.dedent("""\
         [[ 0.  0.  0.  0.  0.  0.  0.]
@@ -91,7 +98,7 @@ def test_symmetries():
          [ 0.  0.  0.  0.  0.  0. -1.]
          [ 0.  0.  0.  0.  0.  0. -1.]
          [ 1.  0.  0.  0.  0.  1.  1.]]""")
-    assert expected_board2 == game.stringRepresentation(board2)
+    assert (_parse(expected_board2) == board2).all()
 
 
 def test_game_ended():

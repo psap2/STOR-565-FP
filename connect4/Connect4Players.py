@@ -59,6 +59,6 @@ class OneStepLookaheadConnect4Player():
             ret_move = np.random.choice(list(fallback_move_set))
             if self.verbose: print('Playing random action %s from %s' % (ret_move, fallback_move_set))
         else:
-            raise Exception('No valid moves remaining: %s' % game.stringRepresentation(board))
+            raise Exception('No valid moves remaining: %s' % self.game.stringRepresentation(board))
 
         return ret_move
